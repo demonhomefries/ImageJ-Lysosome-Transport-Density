@@ -2,7 +2,7 @@
 # ImageJ Jython Pipeline to calculate Lysosome Transport Densities
 
 # Prerequisites
->= Python 3.10.0, with Pandas module installed
+Python 3.10.0, with Pandas module installed
 If you do not have pandas already, install it using `python -m pip install pandas`
 
 
