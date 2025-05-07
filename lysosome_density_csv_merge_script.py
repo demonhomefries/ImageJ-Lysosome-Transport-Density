@@ -41,7 +41,7 @@ if __name__ == "__main__":
     print("Output path:", args.outputPath)
 
 
-    basedir = os.path.dirname(args.MIPfolder)
+    basedir = args.T0folder
     MIPFiles = find_files_surfacedir(args.MIPfolder, ".csv")
     T0Files = []
     for MIP_fp in MIPFiles:
@@ -60,8 +60,8 @@ if __name__ == "__main__":
         T0Files.append(T0_fp)
 
 
-    mip_df = concat_dfs(find_files_surfacedir(MIPFiles, ".csv"))
-    t0_df = concat_dfs(find_files_surfacedir(T0Files, ".csv"))
+    mip_df = concat_dfs(MIPFiles)
+    t0_df = concat_dfs(T0Files)
 
     final_df = pd.merge(mip_df, t0_df, on="wellID", how="outer", indicator="merge_status")
     final_df["Transport Density"] = final_df["Total Area_y"] / final_df["Total Area_x"]
