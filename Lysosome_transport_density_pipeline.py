@@ -3,15 +3,15 @@
 
 
 settings = {
-    "tiff_input_dir" : r"C:\Users\akmishra\Desktop\LTDTest\A1.tif",
+    "tiff_input_dir" : r"C:\Users\akmishra\Desktop\LTDTest",
     "threshold_high": 20617,
     "threshold_low": 65535,
-    "merge_script": r"\lysosome_density_csv_merge_script.py",
-    "crop": True,
-    "crop_x": 20,
-    "crop_y": 100,
-    "crop_width": 1000,
-    "crop_height": 1000
+    "merge_script": r"C:\Users\akmishra\Desktop\ImageJ-Lysosome-Transport-Density\lysosome_density_csv_merge_script.py",
+    "crop": False,
+    "crop_x": 543,
+    "crop_y": 0,
+    "crop_width": 1417,
+    "crop_height": 1960
 }
 # settings["tiff_input_dir"] = r"C:\Users\auto_lyso_transport_density" # FOR TESTING ONLY
 
@@ -21,8 +21,10 @@ import os
 import shutil
 import json
 import subprocess
+from datetime import date
 from ij import IJ
-from ij.plugin import ZProjector
+from ij.gui import Roi
+from ij.plugin import ZProjector, Duplicator
 from ij.measure import ResultsTable
 from ij.plugin.filter import ParticleAnalyzer
 from java.lang import Double
@@ -41,7 +43,7 @@ def find_files_surfacedir(directory, extension=".tif"):
 
 """
 OUTPUT FILEPATHS:
-input_dir/automated_lysosome transport analysis 
+input_dir/{today}_automated_lysosome transport analysis 
     /MIP (max intensity projection)
     /T0 (time point 0)
     /MIP Analyze particles Table
@@ -51,8 +53,8 @@ input_dir/automated_lysosome transport analysis
 
 
 # Output image directories ("mip" = max intensity projection, "t0" = time point 0)
-
-output_dir = os.path.join(settings["tiff_input_dir"], "automated_lysosome_transport_analysis")
+today = date.today().strftime("%Y_%m_%d")
+output_dir = os.path.join(settings["tiff_input_dir"], today + "_automated_lysosome_transport_analysis")
 mip_tif_output_dir = os.path.join(output_dir, "auto_mip_tifs")
 t0_tif_output_dir = os.path.join(output_dir, "auto_t0_tifs")
 
@@ -88,33 +90,70 @@ for tif_fp in tif_file_list:
 
     # Open the image
     imp = IJ.openImage(tif_fp)
+    
+    # Check dimensions
+    w = imp.getWidth()
+    h = imp.getHeight()
+    z = imp.getNSlices()
+    c = imp.getNChannels()
+    t = imp.getNFrames()
+
+    print("Size: {} × {} px,  Z‑slices={},  channels={},  frames={}".format(w, h, z, c, t))
+
 
     IJ.setAutoThreshold(imp, "Default dark no-reset")
     IJ.run(imp, "Convert to Mask", "background=Dark calculate black")
+
+    crop_x = settings["crop_x"]
+    crop_y = settings["crop_y"]
+    crop_w = settings["crop_width"]
+    crop_h = settings["crop_height"]
 
     # Save the T0 image
     t0 = imp.crop("1-1")
     print("\tSliced imp to t0")
     if settings["crop"] == True:
         print("\tPerforming crop on t0")
+        t0.setRoi(Roi(crop_x, crop_y, crop_w, crop_h))
+        t0 = Duplicator().run(t0, 1, 1)
     IJ.save(t0, t0_tif_fp)
     print("\tSaved t0")
     IJ.run(t0, "Analyze Particles...", "summarize")
     print("\tt0 analyzed")
     IJ.saveAs("Results", t0_tables_output_fp)
     print("\tt0 results saved")
+
+    # check dimensions
+    w = t0.getWidth()
+    h = t0.getHeight()
+    z = t0.getNSlices()
+    c = t0.getNChannels()
+    t = t0.getNFrames()
+    print("\tt0 Size: {} × {} px,  Z‑slices={},  channels={},  frames={}".format(w, h, z, c, t))
+
     t0.close()
 
     mip = ZProjector.run(imp,"max")
     print("\n\tCreated MIP")
     if settings["crop"] == True:
         print("\tPerforming crop on t0")
+        mip.setRoi(Roi(crop_x, crop_y, crop_w, crop_h))
+        mip = Duplicator().run(mip, 1, 1)
     IJ.save(mip, mip_tif_fp)
     print("\tSaved MIP")
     IJ.run(mip, "Analyze Particles...", "summarize")
     print("\tMIP analyzed")
     IJ.saveAs("Results", mip_tables_output_fp)
     print("\tMIP results saved")
+
+    # check dimensions
+    w = mip.getWidth()
+    h = mip.getHeight()
+    z = mip.getNSlices()
+    c = mip.getNChannels()
+    t = mip.getNFrames()
+    print("\tmip Size: {} × {} px,  Z‑slices={},  channels={},  frames={}".format(w, h, z, c, t))
+
     mip.close()
 
     imp.close()
