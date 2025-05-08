@@ -62,6 +62,13 @@ if __name__ == "__main__":
 
     mip_df = concat_dfs(MIPFiles)
     t0_df = concat_dfs(T0Files)
+    
+    # 1. Build a helper that removes “MAX_” or “DUP_” (only at the start).
+    clean_slice = lambda s: s.str.replace(r'^(MAX|DUP)_', '', regex=True)
+
+    # 2. Add a temporary key column containing the cleaned filename
+    mip_df['slice_key'] = clean_slice(mip_df['slice'])
+    t0_df['slice_key']  = clean_slice(t0_df['slice'])
 
     final_df = pd.merge(mip_df, t0_df, on="wellID", how="outer", indicator="merge_status")
     final_df["Transport Density"] = final_df["Total Area_y"] / final_df["Total Area_x"]
