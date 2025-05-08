@@ -3,14 +3,17 @@
 
 
 settings = {
-    "tiff_input_dir" : r"T:\Users\images",
+    "tiff_input_dir" : r"C:\Users\akmishra\Desktop\LTDTest\A1.tif",
     "threshold_high": 20617,
     "threshold_low": 65535,
-    "merge_script": r"\lysosome_density_csv_merge_script.py"
+    "merge_script": r"\lysosome_density_csv_merge_script.py",
+    "crop": True,
+    "crop_x": 20,
+    "crop_y": 100,
+    "crop_width": 1000,
+    "crop_height": 1000
 }
 # settings["tiff_input_dir"] = r"C:\Users\auto_lyso_transport_density" # FOR TESTING ONLY
-
-
 
 
 
@@ -92,6 +95,8 @@ for tif_fp in tif_file_list:
     # Save the T0 image
     t0 = imp.crop("1-1")
     print("\tSliced imp to t0")
+    if settings["crop"] == True:
+        print("\tPerforming crop on t0")
     IJ.save(t0, t0_tif_fp)
     print("\tSaved t0")
     IJ.run(t0, "Analyze Particles...", "summarize")
@@ -102,6 +107,8 @@ for tif_fp in tif_file_list:
 
     mip = ZProjector.run(imp,"max")
     print("\n\tCreated MIP")
+    if settings["crop"] == True:
+        print("\tPerforming crop on t0")
     IJ.save(mip, mip_tif_fp)
     print("\tSaved MIP")
     IJ.run(mip, "Analyze Particles...", "summarize")
