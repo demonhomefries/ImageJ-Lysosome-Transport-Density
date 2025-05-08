@@ -22,7 +22,7 @@ def concat_dfs(filepaths):
     df_final = pd.concat(df_all, axis=0, ignore_index=True)
     df_final["wellID"] = df_final["Slice"].apply(lambda x: x.split("_")[1].split(".")[0])
     return df_final
-
+#
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
