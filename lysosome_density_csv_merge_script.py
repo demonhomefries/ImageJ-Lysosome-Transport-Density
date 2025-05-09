@@ -102,6 +102,10 @@ if __name__ == "__main__":
 
     mip_df = concat_dfs(MIPFiles)
     t0_df = concat_dfs(T0Files)
+
+    # Add suffixes for clarity on the source of each column
+    mip_df.columns = [f"{c}_MIP" for c in mip_df.columns]
+    t0_df.columns = [f"{c}_T0" for c in t0_df.columns]
     
     # Old code: doesn't remove multiple instances of MAX_ or DUP_
     # # Build a helper that removes “MAX_” or “DUP_” (only at the start).
@@ -111,16 +115,16 @@ if __name__ == "__main__":
 
     # New code:
     # Add a temporary key column containing the cleaned filename
-    mip_df['slice_key'] = (mip_df['Slice'].str.replace(r'(?:MAX_|DUP_)', '', regex=True))
-    t0_df['slice_key'] = (t0_df['Slice'].str.replace(r'(?:MAX_|DUP_)', '', regex=True))
+    mip_df['slice_key'] = (mip_df['Slice_MIP'].str.replace(r'(?:MAX_|DUP_)', '', regex=True))
+    t0_df['slice_key'] = (t0_df['Slice_T0'].str.replace(r'(?:MAX_|DUP_)', '', regex=True))
 
     # Merge the file based on the slice_key column (the image file name without the MAX or DUP prefix)
     final_df = pd.merge(mip_df, t0_df, on="slice_key", how="outer", indicator="merge_status")
 
     # Calculated column
-    final_df["Transport Density"] = final_df["Total Area_y"] / final_df["Total Area_x"]
-    final_df.drop(["wellID_x", "wellID_y"], axis=1, inplace=True)
-    final_df["WellID"] = final_df["Slice_x"].apply(extract_well_id)
+    final_df["Transport Density"] = final_df["Total Area_MIP"] / final_df["Total Area_T0"]
+    final_df.drop(["wellID_MIP", "wellID_T0"], axis=1, inplace=True)
+    final_df["WellID"] = final_df["Slice_MIP"].apply(extract_well_id)
     final_df.to_csv(args.outputPath, index=False)
     print("Final CSV saved to:", args.outputPath)
     print("*****************lysosome_density_csv_merge_script.py COMPLETED*****************")
