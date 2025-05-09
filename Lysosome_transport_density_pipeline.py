@@ -1,4 +1,4 @@
-# Change the settings dictionary below (line 3-8) according to your needs
+# Change the settings dictionary below (line 6-14) according to your needs
 # Drag this file into Fiji ImageJ and hit run
 
 
@@ -7,13 +7,12 @@ settings = {
     "threshold_high": 20617,
     "threshold_low": 65535,
     "merge_script": r"C:\Users\akmishra\Desktop\ImageJ-Lysosome-Transport-Density\lysosome_density_csv_merge_script.py",
-    "crop": False,
+    "crop": True,
     "crop_x": 543,
     "crop_y": 0,
     "crop_width": 1417,
     "crop_height": 1960
 }
-# settings["tiff_input_dir"] = r"C:\Users\auto_lyso_transport_density" # FOR TESTING ONLY
 
 
 
@@ -40,6 +39,16 @@ def find_files_surfacedir(directory, extension=".tif"):
             files.append(full_path)
 
     return files
+
+def ensure_quoted(path: str):
+    """
+    Probably the stupidest function ever, but somehow neccesary
+    """
+    # Just return it normally if it's already quoted
+    if len(path) >= 2 and path[0] == path[-1] and path[0] in {"'", '"'}:
+        return path
+    # Wrap it in double quotes if not
+    return f'"{path}"'
 
 """
 OUTPUT FILEPATHS:
@@ -161,7 +170,7 @@ for tif_fp in tif_file_list:
     print("Finished: {}".format(tif_name))
 
 
-command = "python " + settings["merge_script"] + " --outputPath " + settings["merged_csv_output_fp"] + " --MIPfolder \"" + mip_tables_output_dir + "\" --T0folder \"" + t0_tables_output_dir + "\""
+command = "python " + ensure_quoted(settings["merge_script"]) + " --outputPath " + ensure_quoted(settings["merged_csv_output_fp"]) + " --MIPfolder " + ensure_quoted(mip_tables_output_dir) + " --T0folder " + ensure_quoted(t0_tables_output_dir) + ""
 print(command)
 
 output_message = subprocess.check_output(command)
