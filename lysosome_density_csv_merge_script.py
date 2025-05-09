@@ -103,12 +103,16 @@ if __name__ == "__main__":
     mip_df = concat_dfs(MIPFiles)
     t0_df = concat_dfs(T0Files)
     
-    # 1. Build a helper that removes “MAX_” or “DUP_” (only at the start).
-    clean_slice = lambda s: s.str.replace(r'^(MAX|DUP)_', '', regex=True)
+    # Old code: doesn't remove multiple instances of MAX_ or DUP_
+    # # Build a helper that removes “MAX_” or “DUP_” (only at the start).
+    # clean_slice = lambda s: s.str.replace(r'^(MAX|DUP)_', '', regex=True)
+    # mip_df['slice_key'] = mip_df['Slice'].replace("MAX_", "").replace("DUP_", "")
+    # t0_df['slice_key']  = t0_df['Slice'].replace("MAX_", "").replace("DUP_", "")
 
-    # 2. Add a temporary key column containing the cleaned filename
-    mip_df['slice_key'] = clean_slice(mip_df['Slice'])
-    t0_df['slice_key']  = clean_slice(t0_df['Slice'])
+    # New code:
+    # Add a temporary key column containing the cleaned filename
+    mip_df['slice_key'] = (mip_df['Slice'].str.replace(r'(?:MAX_|DUP_)', '', regex=True))
+    t0_df['slice_key'] = (t0_df['Slice'].str.replace(r'(?:MAX_|DUP_)', '', regex=True))
 
     # Merge the file based on the slice_key column (the image file name without the MAX or DUP prefix)
     final_df = pd.merge(mip_df, t0_df, on="slice_key", how="outer", indicator="merge_status")
