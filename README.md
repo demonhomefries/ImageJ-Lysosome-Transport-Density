@@ -12,7 +12,3 @@ If you do not have pandas already, install it using `python -m pip install panda
 3. Drag and drop the Lysosome_transport_density_pipeline.py file into the window
 4. Modify the settings dict with your source folder path, thresholding settings, and complete filepath to the lysosome_density_csv_merge_script.py
 5. Click Run
-
-testing testing 123
-welqorigj
-ergoijqerpi
